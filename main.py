@@ -19,15 +19,16 @@ for folder in archive_folders.values():
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-# Function to get folder name based on file name
+# Function to get folder name based on file name suffix
 def get_folder_name(file_name):
+    # Check for suffix at the end of the filename (ignoring the date)
     if file_name.endswith("125"):
         return archive_folders["archive_125"]
     elif file_name.endswith("1000"):
         return archive_folders["archive_1000"]
     elif file_name.endswith("200"):
         return archive_folders["archive_200"]
-    elif file_name.endswith("gasti"):
+    elif file_name.endswith("GASTI"):
         return archive_folders["archive_gasti"]
     return None
 
@@ -95,7 +96,7 @@ with tab2:
         csv_combined = df.to_csv(index=False).encode("utf-8")
         st.download_button("⬇ Download Full Sheet", csv_combined, "full_sheet.csv", "text/csv")
 
-        # Decide the folder based on file name suffix
+        # Get folder name based on the uploaded file's suffix
         folder_name = get_folder_name(uploaded_file.name)
         if folder_name:
             # Create the path to save the uploaded file in the appropriate folder
