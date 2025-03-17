@@ -36,27 +36,13 @@ with tab2:
         selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
         df = xl.parse(selected_sheet)  # Read selected sheet
 
-        # Define the required areas
-        required_rows = list(range(2, 9)) + list(range(10, 61))  # Rows 2-8, 10-60
-        required_columns = list(range(3, 16))  # Columns D to P
+        # Display the full sheet without filtering
+        st.markdown("### 📊 Full Sheet Data")
+        st.dataframe(df)
 
-        # Ensure row indices are within bounds
-        valid_rows = [r for r in required_rows if r < len(df)]
-        valid_cols = [c for c in required_columns if c < len(df.columns)]
-
-        if valid_rows and valid_cols:
-            extracted_data = df.iloc[valid_rows, valid_cols]
-            extracted_data = extracted_data.dropna(how='all', axis=0)  # Remove fully empty rows
-
-            # Display the extracted data
-            st.markdown("### 📊 Extracted Data")
-            st.dataframe(extracted_data)
-
-            # Provide download option
-            csv_combined = extracted_data.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇ Download Extracted Data", csv_combined, "extracted_data.csv", "text/csv")
-        else:
-            st.error("❌ Selected indices are out of range. Please check your file.")
+        # Provide download option
+        csv_combined = df.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇ Download Full Sheet", csv_combined, "full_sheet.csv", "text/csv")
 
         # Store uploaded file in session
         st.session_state.uploaded_files[uploaded_file.name] = df
