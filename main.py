@@ -1,10 +1,19 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import os
+import shutil
 
 # Initialize session state for storing uploaded files
 if "uploaded_files" not in st.session_state:
     st.session_state.uploaded_files = {}
+
+# Define archive folders
+archive_folders = ["Archive_1", "Archive_2", "Archive_3", "Archive_4"]
+
+# Ensure that the archive folders exist
+for folder in archive_folders:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 # Define tabs
 tab1, tab2, tab3 = st.tabs(["📊 Main", "📤 Upload", "📩 Contact Me"])
@@ -48,9 +57,20 @@ with tab2:
         csv_combined = df.to_csv(index=False).encode("utf-8")
         st.download_button("⬇ Download Full Sheet", csv_combined, "full_sheet.csv", "text/csv")
 
-        # Store uploaded file in session
+        # Decide the folder based on some criteria (e.g., the sheet name)
+        folder_name = archive_folders[hash(selected_sheet) % len(archive_folders)]  # Just an example criteria
+
+        # Create the path to save the uploaded file in the appropriate folder
+        save_path = os.path.join(folder_name, uploaded_file.name)
+
+        # Save the file to the selected folder
+        with open(save_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+
+        # Store uploaded file in session (to be displayed in the sidebar)
         st.session_state.uploaded_files[uploaded_file.name] = df
-        st.success(f"✅ {uploaded_file.name} uploaded successfully!")
+
+        st.success(f"✅ {uploaded_file.name} uploaded successfully to {folder_name}!")
 
 # 📩 Contact Me Tab
 with tab3:
