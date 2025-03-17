@@ -40,17 +40,22 @@ with tab2:
         required_rows = list(range(2, 9)) + list(range(10, 61))  # Rows 2-8, 10-60
         required_columns = list(range(3, 16))  # Columns D to P
 
-        # Extract required data
-        extracted_data = df.iloc[required_rows, required_columns]
-        extracted_data = extracted_data.dropna(how='all')  # Remove fully empty rows
+        # Ensure row indices are within bounds
+        valid_rows = [r for r in required_rows if r < len(df)]
+        valid_cols = [c for c in required_columns if c < len(df.columns)]
 
-        # Display the extracted data
-        st.markdown("### 📊 Extracted Data")
-        st.dataframe(extracted_data)
+        if valid_rows and valid_cols:
+            extracted_data = df.iloc[valid_rows, valid_cols].dropna(how='all')  # Remove fully empty rows
 
-        # Provide download option
-        csv_combined = extracted_data.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇ Download Extracted Data", csv_combined, "extracted_data.csv", "text/csv")
+            # Display the extracted data
+            st.markdown("### 📊 Extracted Data")
+            st.dataframe(extracted_data)
+
+            # Provide download option
+            csv_combined = extracted_data.to_csv(index=False).encode("utf-8")
+            st.download_button("⬇ Download Extracted Data", csv_combined, "extracted_data.csv", "text/csv")
+        else:
+            st.error("❌ Selected indices are out of range. Please check your file.")
 
         # Store uploaded file in session
         st.session_state.uploaded_files[uploaded_file.name] = df
