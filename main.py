@@ -22,9 +22,9 @@ for folder in archive_folders.values():
 
 # Function to get folder name based on file name suffix
 def get_folder_name(file_name):
-    # Check if the filename is long enough (at least 8 characters for the date)
+    # Check if the filename is long enough (at least 12 characters: 8 for date and 4 for suffix)
     if len(file_name) >= 12:
-        suffix = file_name[-4:]  # Get the last 4 characters for the suffix (GASTI, 125, 1000, or 200)
+        suffix = file_name[-4:].upper()  # Get the last 4 characters for the suffix (GASTI, 125, 1000, or 200)
 
         # Check if the suffix matches any known category
         if suffix == "125":
