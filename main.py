@@ -1,11 +1,6 @@
+import os
 import streamlit as st
 import pandas as pd
-import os
-import re
-
-# Initialize session state for storing uploaded files
-if "uploaded_files" not in st.session_state:
-    st.session_state.uploaded_files = {}
 
 # Define folder names based on file suffixes
 archive_folders = {
@@ -20,31 +15,9 @@ for folder in archive_folders.values():
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-
-# Function to check and rename files if needed
-def is_valid_file_name(file_name):
-    # Regex pattern to match files: starts with 8 digits (date), followed by one of the known suffixes
-    pattern = r"^\d{8}(GASTI|125|1000|200)\.xlsx?$"
-    return bool(re.match(pattern, file_name))
-
-
-# Function to get folder name based on file name suffix
-def get_folder_name(file_name):
-    # Check if the filename is long enough (at least 12 characters: 8 for date and 4 for suffix)
-    if len(file_name) >= 12:
-        suffix = file_name[-4:].upper()  # Get the last 4 characters for the suffix (GASTI, 125, 1000, or 200)
-
-        # Check if the suffix matches any known category
-        if suffix == "125":
-            return archive_folders["archive_125"]
-        elif suffix == "1000":
-            return archive_folders["archive_1000"]
-        elif suffix == "200":
-            return archive_folders["archive_200"]
-        elif suffix == "GASTI":
-            return archive_folders["archive_gasti"]
-    return None
-
+# Initialize session state for storing uploaded files
+if "uploaded_files" not in st.session_state:
+    st.session_state.uploaded_files = {}
 
 # Define tabs
 tab1, tab2, tab3 = st.tabs(["📊 Main", "📤 Upload", "📩 Contact Me"])
@@ -54,36 +27,22 @@ with tab1:
     st.title("📊 Welcome to My Application")
     st.write("This app helps us track daily production issues, statistics, and analyze data for insights.")
 
-    # Show archived files in the sidebar
+    # Show folders in the sidebar
     st.sidebar.title("📂 Archives")
     for folder_name, folder_path in archive_folders.items():
-        if os.path.exists(folder_path):
-            with st.sidebar.expander(folder_name):
-                # List files in the folder
-                for file_name in os.listdir(folder_path):
-                    if file_name.endswith(('.xlsx', '.xls')):
-                        file_path = os.path.join(folder_path, file_name)
-                        st.write(f"📄 {file_name}")
+        st.sidebar.subheader(folder_name)
 
-                        # Show preview of file in the sidebar
-                        if file_name in st.session_state.uploaded_files:
-                            df = st.session_state.uploaded_files[file_name]
-                            st.write(df.head())  # Preview the first few rows
+        # List files in each folder
+        for file_name in os.listdir(folder_path):
+            if file_name.endswith((".xlsx", ".xls")):  # Check if it's an Excel file
+                file_path = os.path.join(folder_path, file_name)
+                with st.sidebar.expander(file_name):
+                    df = pd.read_excel(file_path)  # Read the file
+                    st.write(df.head())  # Display preview
 
-                        # Provide download option
-                        csv = df.to_csv(index=False).encode("utf-8")
-                        st.download_button(f"⬇ Download {file_name}", csv, file_name, "text/csv")
-
-                        # Option to delete the file
-                        delete_button = st.button(f"❌ Delete {file_name}")
-                        if delete_button:
-                            # Delete the file from the file system and session state
-                            if os.path.exists(file_path):
-                                os.remove(file_path)
-                                st.session_state.uploaded_files.pop(file_name, None)
-                                st.success(f"✅ {file_name} deleted successfully!")
-                            else:
-                                st.error(f"⚠️ File {file_name} not found.")
+                    # Provide a download button for the file
+                    csv = df.to_csv(index=False).encode("utf-8")
+                    st.download_button("⬇ Download", csv, file_name, "text/csv")
 
 # 📤 Upload Tab
 with tab2:
@@ -92,47 +51,42 @@ with tab2:
     uploaded_file = st.file_uploader("📂 Choose an Excel file", type=["xlsx", "xls"])
 
     if uploaded_file is not None:
-        # Get the file name
+        xl = pd.ExcelFile(uploaded_file)  # Load Excel file
+        sheet_names = xl.sheet_names  # Get sheet names
+
+        # Select sheet
+        selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
+        df = xl.parse(selected_sheet)  # Read selected sheet
+
+        # Display the full sheet without filtering
+        st.markdown("### 📊 Full Sheet Data")
+        st.dataframe(df)
+
+        # Provide download option
+        csv_combined = df.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇ Download Full Sheet", csv_combined, "full_sheet.csv", "text/csv")
+
+        # Determine folder based on file name suffix
         file_name = uploaded_file.name
-
-        # Validate the file name format
-        if is_valid_file_name(file_name):
-            xl = pd.ExcelFile(uploaded_file)  # Load Excel file
-            sheet_names = xl.sheet_names  # Get sheet names
-
-            # Select sheet
-            selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
-            df = xl.parse(selected_sheet)  # Read selected sheet
-
-            # Replace None/NaN with empty strings for display purposes
-            df = df.where(pd.notnull(df), "")
-
-            # Display the full sheet without filtering
-            st.markdown("### 📊 Full Sheet Data")
-            st.dataframe(df)
-
-            # Provide download option
-            csv_combined = df.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇ Download Full Sheet", csv_combined, "full_sheet.csv", "text/csv")
-
-            # Get folder name based on the uploaded file's suffix
-            folder_name = get_folder_name(file_name)
-            if folder_name:
-                # Create the path to save the uploaded file in the appropriate folder
-                save_path = os.path.join(folder_name, file_name)
-
-                # Save the file to the selected folder
-                with open(save_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-
-                # Store uploaded file in session
-                st.session_state.uploaded_files[file_name] = df
-                st.success(f"✅ {file_name} uploaded successfully to {folder_name}!")
-            else:
-                st.error("⚠️ File name does not match any known category.")
+        if file_name.endswith("125.xlsx"):
+            target_folder = archive_folders["archive_125"]
+        elif file_name.endswith("1000.xlsx"):
+            target_folder = archive_folders["archive_1000"]
+        elif file_name.endswith("200.xlsx"):
+            target_folder = archive_folders["archive_200"]
+        elif file_name.endswith("GASTI.xlsx"):
+            target_folder = archive_folders["archive_gasti"]
         else:
-            st.error(
-                "⚠️ The uploaded file name does not match the required format. Please rename it to follow the pattern 'Date(Suffix).xlsx'. Example: '02022025GASTI.xlsx'.")
+            st.error("⚠️ File name does not match any known category.")
+            target_folder = None
+
+        # Move the file to the correct folder and save it
+        if target_folder:
+            file_path = os.path.join(target_folder, file_name)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.session_state.uploaded_files[file_name] = df
+            st.success(f"✅ {uploaded_file.name} uploaded and saved to {target_folder}.")
 
 # 📩 Contact Me Tab
 with tab3:
