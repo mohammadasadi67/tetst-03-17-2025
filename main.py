@@ -45,7 +45,8 @@ with tab2:
         valid_cols = [c for c in required_columns if c < len(df.columns)]
 
         if valid_rows and valid_cols:
-            extracted_data = df.iloc[valid_rows, valid_cols].dropna(how='all')  # Remove fully empty rows
+            extracted_data = df.iloc[valid_rows, valid_cols]
+            extracted_data = extracted_data.dropna(how='all', axis=0)  # Remove fully empty rows
 
             # Display the extracted data
             st.markdown("### 📊 Extracted Data")
