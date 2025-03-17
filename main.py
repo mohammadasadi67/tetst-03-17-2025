@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # Initialize session state for storing uploaded files
 if "uploaded_files" not in st.session_state:
@@ -35,6 +36,9 @@ with tab2:
         # Select sheet
         selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
         df = xl.parse(selected_sheet)  # Read selected sheet
+
+        # Replace None/NaN with empty strings for display purposes
+        df = df.where(pd.notnull(df), "")
 
         # Display the full sheet without filtering
         st.markdown("### 📊 Full Sheet Data")
