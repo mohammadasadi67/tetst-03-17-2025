@@ -19,7 +19,6 @@ for folder in archive_folders.values():
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-
 # Function to get folder name based on file name
 def get_folder_name(file_name):
     if file_name.endswith("125"):
@@ -32,7 +31,6 @@ def get_folder_name(file_name):
         return archive_folders["archive_gasti"]
     return None
 
-
 # Define tabs
 tab1, tab2, tab3 = st.tabs(["📊 Main", "📤 Upload", "📩 Contact Me"])
 
@@ -43,28 +41,34 @@ with tab1:
 
     # Show archived files in the sidebar
     st.sidebar.title("📂 Archives")
-    if st.session_state.uploaded_files:
-        for file_name, df in st.session_state.uploaded_files.items():
-            with st.sidebar.expander(file_name):
-                st.write(df.head())  # Show preview
-                csv = df.to_csv(index=False).encode("utf-8")
-                st.download_button("⬇ Download", csv, file_name, "text/csv")
+    for folder_name, folder_path in archive_folders.items():
+        if os.path.exists(folder_path):
+            with st.sidebar.expander(folder_name):
+                # List files in the folder
+                for file_name in os.listdir(folder_path):
+                    if file_name.endswith(('.xlsx', '.xls')):
+                        file_path = os.path.join(folder_path, file_name)
+                        st.write(f"📄 {file_name}")
 
-                # Option to delete the file
-                delete_button = st.button(f"❌ Delete {file_name}")
-                if delete_button:
-                    # Delete the file from the file system and session state
-                    folder_name = get_folder_name(file_name)
-                    if folder_name:
-                        file_path = os.path.join(folder_name, file_name)
-                        if os.path.exists(file_path):
-                            os.remove(file_path)
-                            st.session_state.uploaded_files.pop(file_name, None)
-                            st.success(f"✅ {file_name} deleted successfully!")
-                        else:
-                            st.error(f"⚠️ File {file_name} not found.")
-                    else:
-                        st.error(f"⚠️ Could not determine folder for {file_name}.")
+                        # Show preview of file in the sidebar
+                        if file_name in st.session_state.uploaded_files:
+                            df = st.session_state.uploaded_files[file_name]
+                            st.write(df.head())  # Preview the first few rows
+
+                        # Provide download option
+                        csv = df.to_csv(index=False).encode("utf-8")
+                        st.download_button(f"⬇ Download {file_name}", csv, file_name, "text/csv")
+
+                        # Option to delete the file
+                        delete_button = st.button(f"❌ Delete {file_name}")
+                        if delete_button:
+                            # Delete the file from the file system and session state
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                                st.session_state.uploaded_files.pop(file_name, None)
+                                st.success(f"✅ {file_name} deleted successfully!")
+                            else:
+                                st.error(f"⚠️ File {file_name} not found.")
 
 # 📤 Upload Tab
 with tab2:
