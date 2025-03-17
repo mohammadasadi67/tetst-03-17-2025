@@ -22,7 +22,7 @@ with tab2:
 # Contact Tab
 with tab3:
     st.title("Contact Me")
-    st.write("For any inquiries, contact me at: example@email.com")
+    st.write("For any inquiries, contact me at: m.asdz@yahoo.com")
 
 # Sidebar - Archive Section
 st.sidebar.title("📂 Archives")
