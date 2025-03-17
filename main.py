@@ -36,10 +36,10 @@ with tab2:
         selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
         df = xl.parse(selected_sheet)  # Read selected sheet
 
-        # Extract required sections
-        section1 = df.iloc[0:9, df.columns.get_loc("D"): df.columns.get_loc("P") + 1]
-        section2 = df.iloc[9:11, df.columns.get_loc("I"): df.columns.get_loc("P") + 1]
-        section3 = df.iloc[16:25, df.columns.get_loc("K"): df.columns.get_loc("L") + 1]
+        # Extract required sections using column indices (D to P, I to P, K to L)
+        section1 = df.iloc[0:9, 3:16]  # Columns D to P (indices 3 to 15)
+        section2 = df.iloc[9:11, 8:16]  # Columns I to P (indices 8 to 15)
+        section3 = df.iloc[16:25, 10:12]  # Columns K to L (indices 10 to 11)
 
         # Show data sections
         st.subheader("📊 Section 1: D-P (Rows 1-9)")
