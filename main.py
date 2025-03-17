@@ -19,18 +19,24 @@ for folder in archive_folders.values():
     if not os.path.exists(folder):
         os.makedirs(folder)
 
+
 # Function to get folder name based on file name suffix
 def get_folder_name(file_name):
-    # Check for suffix at the end of the filename (ignoring the date)
-    if file_name.endswith("125"):
-        return archive_folders["archive_125"]
-    elif file_name.endswith("1000"):
-        return archive_folders["archive_1000"]
-    elif file_name.endswith("200"):
-        return archive_folders["archive_200"]
-    elif file_name.endswith("GASTI"):
-        return archive_folders["archive_gasti"]
+    # Check if the filename is long enough (at least 8 characters for the date)
+    if len(file_name) >= 12:
+        suffix = file_name[-4:]  # Get the last 4 characters for the suffix (GASTI, 125, 1000, or 200)
+
+        # Check if the suffix matches any known category
+        if suffix == "125":
+            return archive_folders["archive_125"]
+        elif suffix == "1000":
+            return archive_folders["archive_1000"]
+        elif suffix == "200":
+            return archive_folders["archive_200"]
+        elif suffix == "GASTI":
+            return archive_folders["archive_gasti"]
     return None
+
 
 # Define tabs
 tab1, tab2, tab3 = st.tabs(["📊 Main", "📤 Upload", "📩 Contact Me"])
