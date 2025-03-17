@@ -41,27 +41,23 @@ with tab2:
         section2 = df.iloc[9:11, 8:16]  # Columns I to P (indices 8 to 15)
         section3 = df.iloc[16:25, 10:12]  # Columns K to L (indices 10 to 11)
 
-        # Section 1 - Columns D-P
-        st.markdown("### 📊 Section 1: Columns D to P (Rows 1-9)")
-        st.dataframe(section1)
-        csv1 = section1.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇ Download Section 1", csv1, "section1.csv", "text/csv")
+        # Combine all sections into one DataFrame
+        combined_df = pd.concat([section1, section2, section3], ignore_index=True)
 
-        st.markdown("---")  # Add a separator line
+        # Remove rows where all values are None
+        combined_df = combined_df.dropna(how='all')
 
-        # Section 2 - Columns I-P
-        st.markdown("### 📊 Section 2: Columns I to P (Rows 10-11)")
-        st.dataframe(section2)
-        csv2 = section2.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇ Download Section 2", csv2, "section2.csv", "text/csv")
+        # Show the combined DataFrame if it has any data
+        if not combined_df.empty:
+            st.markdown("### 📊 Combined Data")
+            st.dataframe(combined_df)
 
-        st.markdown("---")  # Add a separator line
+            # Provide download option
+            csv_combined = combined_df.to_csv(index=False).encode("utf-8")
+            st.download_button("⬇ Download Combined Data", csv_combined, "combined_data.csv", "text/csv")
 
-        # Section 3 - Columns K-L
-        st.markdown("### 📊 Section 3: Columns K to L (Rows 17-25)")
-        st.dataframe(section3)
-        csv3 = section3.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇ Download Section 3", csv3, "section3.csv", "text/csv")
+        else:
+            st.warning("⚠️ No data available after filtering empty rows.")
 
         # Store uploaded file in session
         st.session_state.uploaded_files[uploaded_file.name] = df
