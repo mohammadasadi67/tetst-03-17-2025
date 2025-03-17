@@ -36,28 +36,27 @@ with tab2:
         selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
         df = xl.parse(selected_sheet)  # Read selected sheet
 
-        # Extract required sections using column indices (D to P, I to P, K to L)
-        section1 = df.iloc[0:9, 3:16]  # Columns D to P (indices 3 to 15)
-        section2 = df.iloc[9:11, 8:16]  # Columns I to P (indices 8 to 15)
-        section3 = df.iloc[16:25, 10:12]  # Columns K to L (indices 10 to 11)
-
-        # Combine all sections into one DataFrame
-        combined_df = pd.concat([section1, section2, section3], ignore_index=True)
+        # Extract required sections using row range (11-23) and columns D to P
+        section = df.iloc[10:23, 3:16]  # Rows 11 to 23, Columns D to P (indices 3 to 15)
 
         # Remove rows where all values are None
-        combined_df = combined_df.dropna(how='all')
+        section = section.dropna(how='all')
 
-        # Show the combined DataFrame if it has any data
-        if not combined_df.empty:
-            st.markdown("### 📊 Combined Data")
-            st.dataframe(combined_df)
+        # Styling: Set empty cells to black
+        def highlight_empty_cells(val):
+            color = 'black' if pd.isna(val) else 'white'  # If value is NaN, color it black
+            return f'background-color: {color};'
 
-            # Provide download option
-            csv_combined = combined_df.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇ Download Combined Data", csv_combined, "combined_data.csv", "text/csv")
+        # Show the styled dataframe
+        styled_df = section.style.applymap(highlight_empty_cells)
 
-        else:
-            st.warning("⚠️ No data available after filtering empty rows.")
+        # Display the styled dataframe
+        st.markdown("### 📊 Data (Rows 11 to 23, Columns D to P)")
+        st.dataframe(styled_df)
+
+        # Provide download option
+        csv_combined = section.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇ Download Data (Rows 11 to 23)", csv_combined, "data_11_to_23.csv", "text/csv")
 
         # Store uploaded file in session
         st.session_state.uploaded_files[uploaded_file.name] = df
