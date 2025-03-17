@@ -36,27 +36,21 @@ with tab2:
         selected_sheet = st.selectbox("📑 Select Sheet", sheet_names)
         df = xl.parse(selected_sheet)  # Read selected sheet
 
-        # Extract required sections using row range (11-23) and columns D to P
-        section = df.iloc[10:23, 3:16]  # Rows 11 to 23, Columns D to P (indices 3 to 15)
+        # Define the required areas
+        required_rows = list(range(2, 9)) + list(range(10, 61))  # Rows 2-8, 10-60
+        required_columns = list(range(3, 16))  # Columns D to P
 
-        # Remove rows where all values are None
-        section = section.dropna(how='all')
+        # Extract required data
+        extracted_data = df.iloc[required_rows, required_columns]
+        extracted_data = extracted_data.dropna(how='all')  # Remove fully empty rows
 
-        # Styling: Set empty cells to black
-        def highlight_empty_cells(val):
-            color = 'black' if pd.isna(val) else 'white'  # If value is NaN, color it black
-            return f'background-color: {color};'
-
-        # Show the styled dataframe
-        styled_df = section.style.applymap(highlight_empty_cells)
-
-        # Display the styled dataframe
-        st.markdown("### 📊 Data (Rows 11 to 23, Columns D to P)")
-        st.dataframe(styled_df)
+        # Display the extracted data
+        st.markdown("### 📊 Extracted Data")
+        st.dataframe(extracted_data)
 
         # Provide download option
-        csv_combined = section.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇ Download Data (Rows 11 to 23)", csv_combined, "data_11_to_23.csv", "text/csv")
+        csv_combined = extracted_data.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇ Download Extracted Data", csv_combined, "extracted_data.csv", "text/csv")
 
         # Store uploaded file in session
         st.session_state.uploaded_files[uploaded_file.name] = df
