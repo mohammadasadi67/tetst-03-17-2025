@@ -39,6 +39,6 @@ with tab2:
 # 📩 Contact Me Tab
 with tab3:
     st.title("📩 Contact Me")
-    st.write("📧 Email: **example@email.com**")
-    st.write("📞 Phone: **+123456789**")
+    st.write("📧 Email: **m.asdz@yahoo.com**")
+    st.write("📞 Phone: **+989367267241**")
 
