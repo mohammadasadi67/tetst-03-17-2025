@@ -41,18 +41,24 @@ with tab2:
         section2 = df.iloc[9:11, 8:16]  # Columns I to P (indices 8 to 15)
         section3 = df.iloc[16:25, 10:12]  # Columns K to L (indices 10 to 11)
 
-        # Show data sections
-        st.subheader("📊 Section 1: D-P (Rows 1-9)")
+        # Section 1 - Columns D-P
+        st.markdown("### 📊 Section 1: Columns D to P (Rows 1-9)")
         st.dataframe(section1)
         csv1 = section1.to_csv(index=False).encode("utf-8")
         st.download_button("⬇ Download Section 1", csv1, "section1.csv", "text/csv")
 
-        st.subheader("📊 Section 2: I-P (Rows 10-11)")
+        st.markdown("---")  # Add a separator line
+
+        # Section 2 - Columns I-P
+        st.markdown("### 📊 Section 2: Columns I to P (Rows 10-11)")
         st.dataframe(section2)
         csv2 = section2.to_csv(index=False).encode("utf-8")
         st.download_button("⬇ Download Section 2", csv2, "section2.csv", "text/csv")
 
-        st.subheader("📊 Section 3: K-L (Rows 17-25)")
+        st.markdown("---")  # Add a separator line
+
+        # Section 3 - Columns K-L
+        st.markdown("### 📊 Section 3: Columns K to L (Rows 17-25)")
         st.dataframe(section3)
         csv3 = section3.to_csv(index=False).encode("utf-8")
         st.download_button("⬇ Download Section 3", csv3, "section3.csv", "text/csv")
