@@ -1,20 +1,29 @@
 import os
-import shutil
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import shutil
 
 # Define folder names based on file suffixes
-archive_folders = [
-    "Archive_125",
-    "Archive_1000",
-    "Archive_200",
-    "Archive_gasti"
-]
+archive_folders = {
+    "archive_125": "Archive_125",
+    "archive_1000": "Archive_1000",
+    "archive_200": "Archive_200",
+    "archive_gasti": "Archive_gasti"
+}
 
-# Ensure that the archive folders exist (or create them if they don't exist)
-for folder in archive_folders:
+# Ensure that the archive folders exist
+for folder in archive_folders.values():
     if not os.path.exists(folder):
         os.makedirs(folder)
+
+# Function to delete all archives
+def delete_all_archives():
+    for folder in archive_folders.values():
+        if os.path.exists(folder):
+            shutil.rmtree(folder)  # Delete the folder and its contents
+            st.success(f"Deleted folder: {folder}")
+        else:
+            st.warning(f"Folder {folder} does not exist.")
 
 # Initialize session state for storing uploaded files
 if "uploaded_files" not in st.session_state:
@@ -30,7 +39,7 @@ with tab1:
 
     # Show folders in the sidebar
     st.sidebar.title("📂 Archives")
-    for folder_name, folder_path in zip(["Archive_125", "Archive_1000", "Archive_200", "Archive_gasti"], archive_folders):
+    for folder_name, folder_path in archive_folders.items():
         st.sidebar.subheader(folder_name)
 
         # List files in each folder
@@ -53,42 +62,29 @@ with tab2:
 
             # Determine folder based on file name suffix
             if file_name.endswith("125.xlsx"):
-                target_folder = archive_folders[0]
+                target_folder = archive_folders["archive_125"]
             elif file_name.endswith("1000.xlsx"):
-                target_folder = archive_folders[1]
+                target_folder = archive_folders["archive_1000"]
             elif file_name.endswith("200.xlsx"):
-                target_folder = archive_folders[2]
+                target_folder = archive_folders["archive_200"]
             elif file_name.endswith("GASTI.xlsx"):
-                target_folder = archive_folders[3]
+                target_folder = archive_folders["archive_gasti"]
             else:
                 st.error("⚠️ File name does not match any known category.")
                 target_folder = None
 
+            # If a target folder is selected, save the file there
             if target_folder:
-                # Save file in the correct folder
-                with open(os.path.join(target_folder, uploaded_file.name), "wb") as f:
+                file_path = os.path.join(target_folder, file_name)
+                with open(file_path, "wb") as f:
                     f.write(uploaded_file.getbuffer())
-                st.success(f"File '{uploaded_file.name}' uploaded successfully to {target_folder}.")
+                st.success(f"File {file_name} uploaded successfully to {target_folder}.")
 
-    # 📂 Delete All Archives Section
-    st.subheader("📂 Delete All Archives")
+    # Button to delete all archives
+    if st.button("Delete All Archives"):
+        delete_all_archives()
 
-    # Add a button to delete all archives
-    delete_all_button = st.button("Delete All Archives")
-
-    # If the button is clicked
-    if delete_all_button:
-        for folder in archive_folders:
-            if os.path.exists(folder):
-                try:
-                    shutil.rmtree(folder)  # Delete the entire folder and its contents
-                    st.success(f"Folder {folder} has been deleted successfully!")
-                except Exception as e:
-                    st.error(f"Error deleting folder {folder}: {e}")
-            else:
-                st.warning(f"Folder {folder} does not exist.")
-
-# 📩 Contact Me Tab
+# 📩 Contact Tab
 with tab3:
     st.title("📩 Contact Me")
-    st.write("You can reach me at [m.asdz@yahoo.com](mailto:m.asdz@yahoo.com).")
+    st.write("For questions or feedback, please contact us!")
