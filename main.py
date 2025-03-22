@@ -42,34 +42,52 @@ with tab1:
             st.sidebar.write("(No files uploaded yet)")
 
         # Extract data from Excel files in the folder
-        device_total = 0
+        device_total_production = 0
+        device_total_waste_kg = 0
+        device_total_waste_package = 0
+
         for file_name in file_names:
             file_path = os.path.join(folder_path, file_name)
             xl = pd.ExcelFile(file_path)  # Load Excel file
             sheet_name = xl.sheet_names[0]  # Assume data is in the first sheet
             df = xl.parse(sheet_name)
 
-            # Print the columns and the first few rows of the dataframe for debugging
-            st.write(f"Columns in {file_name}: {df.columns.tolist()}")
-            st.write(f"First few rows of {file_name}:")
-            st.write(df.head())
-
             # Check if columns 'I' to 'P' exist in the dataframe
             if all(col in df.columns for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']):
-                # Extract sum of values from columns I to P and rows 10 to 12
-                sum_values = df.loc[9:11, 'I':'P'].sum().sum()  # Sum the range from I10:P12
-                device_total += sum_values
+                # Sum the Total Production from column J (J10:J12)
+                total_production = df.loc[9:11, 'J'].sum()
+                device_total_production += total_production
+
+                # Sum the Waste (L for waste/kg, M for waste/package)
+                total_waste_kg = df.loc[9:11, 'L'].sum()
+                device_total_waste_kg += total_waste_kg
+
+                total_waste_package = df.loc[9:11, 'M'].sum()
+                device_total_waste_package += total_waste_package
+
             else:
-                st.warning(f"⚠️ The columns 'I' to 'P' are missing in {file_name}.")
+                st.warning(f"⚠️ The required columns 'I' to 'P' are missing in {file_name}.")
 
-        total_data[device_name] = device_total
+        # Store totals for each device
+        total_data[device_name] = {
+            "Total Production": device_total_production,
+            "Total Waste (kg)": device_total_waste_kg,
+            "Total Waste (Package)": device_total_waste_package
+        }
 
-    # Plotting the total data for each device using streamlit bar chart
-    st.subheader("📊 Total Data per Device")
+    # Display summary of totals
+    st.subheader("📊 Summary of Totals per Device")
     st.write(total_data)
 
     # Create a bar chart for the total data
-    st.bar_chart(total_data)
+    production_data = {device: data["Total Production"] for device, data in total_data.items()}
+    waste_kg_data = {device: data["Total Waste (kg)"] for device, data in total_data.items()}
+    waste_package_data = {device: data["Total Waste (Package)"] for device, data in total_data.items()}
+
+    st.subheader("📊 Production vs Waste (kg and Package)")
+    st.bar_chart(production_data, use_container_width=True)
+    st.bar_chart(waste_kg_data, use_container_width=True)
+    st.bar_chart(waste_package_data, use_container_width=True)
 
 # 📤 Upload Tab
 with tab2:
