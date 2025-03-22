@@ -59,4 +59,6 @@ with tab2:
                 target_folder = archive_folders["archive_200"]
             elif file_name.endswith("GASTI.xlsx"):
                 target_folder = archive_folders["archive_gasti"]
-            else:
+         else:
+    st.error("⚠️ File name does not match any known category.")
+    target_folder = None
