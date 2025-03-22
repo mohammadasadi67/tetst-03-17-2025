@@ -70,23 +70,23 @@ with tab2:
                     f.write(uploaded_file.getbuffer())
                 st.success(f"File '{uploaded_file.name}' uploaded successfully to {target_folder}.")
 
+    # 📂 Delete All Archives Section
+    st.title("📂 Delete All Archives")
+    delete_all_button = st.button("Delete All Archives")
+
+    # If the button is clicked
+    if delete_all_button:
+        for folder in archive_folders:
+            if os.path.exists(folder):
+                try:
+                    shutil.rmtree(folder)  # Delete the entire folder and its contents
+                    st.success(f"Folder {folder} has been deleted successfully!")
+                except Exception as e:
+                    st.error(f"Error deleting folder {folder}: {e}")
+            else:
+                st.warning(f"Folder {folder} does not exist.")
+
 # 📩 Contact Me Tab
 with tab3:
     st.title("📩 Contact Me")
     st.write("You can reach me at [m.asdz@yahoo.com](mailto:m.asdz@yahoo.com).")
-
-# 📂 Delete All Archives Section
-st.title("📂 Delete All Archives")
-delete_all_button = st.button("Delete All Archives")
-
-# If the button is clicked
-if delete_all_button:
-    for folder in archive_folders:
-        if os.path.exists(folder):
-            try:
-                shutil.rmtree(folder)  # Delete the entire folder and its contents
-                st.success(f"Folder {folder} has been deleted successfully!")
-            except Exception as e:
-                st.error(f"Error deleting folder {folder}: {e}")
-        else:
-            st.warning(f"Folder {folder} does not exist.")
