@@ -27,18 +27,6 @@ with tab1:
     st.title("📊 Welcome to My Application")
     st.write("This app helps us track daily production issues, statistics, and analyze data for insights.")
 
-    # Add a button to delete all archives
-    st.subheader("Delete All Archives")
-    delete_button = st.button("Delete All Archives")
-
-    if delete_button:
-        for folder in archive_folders.values():
-            for file in os.listdir(folder):
-                file_path = os.path.join(folder, file)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-        st.success("All archive files have been deleted.")
-
 # 📤 Upload Tab
 with tab2:
     st.title("📤 Upload & Select Data")
@@ -60,6 +48,31 @@ with tab2:
                 st.write(f"Sum of total production (I10:P12) for {file_name}: {sum_values}")
             except Exception as e:
                 st.error(f"Error processing {file_name}: {e}")
+
+# 📂 Archive Sidebar
+with st.sidebar:
+    st.title("📂 Archives")
+
+    # List files in each folder
+    for folder_name, folder_path in archive_folders.items():
+        st.subheader(folder_name)
+
+        file_names = [f for f in os.listdir(folder_path) if f.endswith((".xlsx", ".xls"))]
+        if file_names:
+            st.sidebar.write("\n".join(file_names))
+        else:
+            st.sidebar.write("(No files uploaded yet)")
+
+    # Add the delete button in the sidebar
+    delete_button = st.button("Delete All Archives")
+    
+    if delete_button:
+        for folder in archive_folders.values():
+            for file in os.listdir(folder):
+                file_path = os.path.join(folder, file)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+        st.sidebar.success("All archive files have been deleted.")
 
 # 📩 Contact Tab
 with tab3:
