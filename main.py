@@ -35,7 +35,7 @@ with tab1:
         st.sidebar.subheader(device_name)
 
         # List files in each folder
-        file_names = [f for f in os.listdir(folder_path) if f.endswith((".xlsx", ".xls"))]  # Fixed the missing parenthesis
+        file_names = [f for f in os.listdir(folder_path) if f.endswith((".xlsx", ".xls"))]
         if file_names:
             st.sidebar.write("\n".join(file_names))
         else:
@@ -49,9 +49,18 @@ with tab1:
             sheet_name = xl.sheet_names[0]  # Assume data is in the first sheet
             df = xl.parse(sheet_name)
 
-            # Extract sum of values from columns I to P and rows 10 to 12
-            sum_values = df.loc[9:11, 'I':'P'].sum().sum()  # Sum the range from I10:P12
-            device_total += sum_values
+            # Print the columns and the first few rows of the dataframe for debugging
+            st.write(f"Columns in {file_name}: {df.columns.tolist()}")
+            st.write(f"First few rows of {file_name}:")
+            st.write(df.head())
+
+            # Check if columns 'I' to 'P' exist in the dataframe
+            if all(col in df.columns for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']):
+                # Extract sum of values from columns I to P and rows 10 to 12
+                sum_values = df.loc[9:11, 'I':'P'].sum().sum()  # Sum the range from I10:P12
+                device_total += sum_values
+            else:
+                st.warning(f"⚠️ The columns 'I' to 'P' are missing in {file_name}.")
 
         total_data[device_name] = device_total
 
