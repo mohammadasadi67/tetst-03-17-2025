@@ -71,7 +71,9 @@ with tab2:
                 st.success(f"File '{uploaded_file.name}' uploaded successfully to {target_folder}.")
 
     # 📂 Delete All Archives Section
-    st.title("📂 Delete All Archives")
+    st.subheader("📂 Delete All Archives")
+
+    # Add a button to delete all archives
     delete_all_button = st.button("Delete All Archives")
 
     # If the button is clicked
