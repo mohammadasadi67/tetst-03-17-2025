@@ -2,6 +2,19 @@ import os
 import streamlit as st
 import pandas as pd
 
+# Define folder names based on file suffixes (archive folders)
+archive_folders = {
+    "archive_125": "Archive_125",
+    "archive_1000": "Archive_1000",
+    "archive_200": "Archive_200",
+    "archive_gasti": "Archive_gasti"
+}
+
+# Ensure that the archive folders exist
+for folder in archive_folders.values():
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
 # Initialize session state for storing uploaded files
 if "uploaded_files" not in st.session_state:
     st.session_state.uploaded_files = {}
@@ -13,6 +26,18 @@ tab1, tab2, tab3 = st.tabs(["📊 Main", "📤 Upload", "📩 Contact Me"])
 with tab1:
     st.title("📊 Welcome to My Application")
     st.write("This app helps us track daily production issues, statistics, and analyze data for insights.")
+
+    # Add a button to delete all archives
+    st.subheader("Delete All Archives")
+    delete_button = st.button("Delete All Archives")
+
+    if delete_button:
+        for folder in archive_folders.values():
+            for file in os.listdir(folder):
+                file_path = os.path.join(folder, file)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+        st.success("All archive files have been deleted.")
 
 # 📤 Upload Tab
 with tab2:
