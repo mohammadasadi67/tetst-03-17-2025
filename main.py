@@ -59,6 +59,13 @@ with tab2:
                 target_folder = archive_folders["archive_200"]
             elif file_name.endswith("GASTI.xlsx"):
                 target_folder = archive_folders["archive_gasti"]
-         else:
-             st.error("⚠️ File name does not match any known category.")
-             target_folder = None
+            else:
+                st.error("⚠️ File name does not match any known category.")
+                target_folder = None
+
+            if target_folder:
+                # Save the file to the appropriate folder
+                with open(os.path.join(target_folder, file_name), "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                st.success(f"✅ {file_name} uploaded successfully to {target_folder}.")
+
