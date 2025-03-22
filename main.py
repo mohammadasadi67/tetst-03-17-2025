@@ -52,10 +52,14 @@ with tab1:
             sheet_name = xl.sheet_names[0]  # Assume data is in the first sheet
             df = xl.parse(sheet_name)
 
-            # Check if columns 'I' to 'P' exist in the dataframe
+            # Check the actual column names
+            st.write(f"Checking columns in file: {file_name}")
+            st.write(df.columns)
+
+            # Check if the required columns exist
             if all(col in df.columns for col in ['I', 'J', 'K', 'L', 'M', 'N', 'O', 'P']):
                 # Sum the Total Production from column J (J10:J12)
-                total_production = df.loc[9:11, 'J'].sum()
+                total_production = df.loc[9:11, 'J'].sum()  # row indices 9, 10, 11 represent Excel rows 10, 11, 12
                 device_total_production += total_production
 
                 # Sum the Waste (L for waste/kg, M for waste/package)
@@ -64,9 +68,8 @@ with tab1:
 
                 total_waste_package = df.loc[9:11, 'M'].sum()
                 device_total_waste_package += total_waste_package
-
             else:
-                st.warning(f"⚠️ The required columns 'I' to 'P' are missing in {file_name}.")
+                st.warning(f"⚠️ The required columns 'I' to 'P' are missing in {file_name}. Please check column headers.")
 
         # Store totals for each device
         total_data[device_name] = {
