@@ -81,7 +81,8 @@ with tab2:
                 st.success(f"File {file_name} uploaded successfully to {target_folder}.")
 
     # Button to delete all archives
-    if st.button("Delete All Archives"):
+    delete_button = st.button("Delete All Archives")
+    if delete_button:
         delete_all_archives()
 
 # 📩 Contact Tab
