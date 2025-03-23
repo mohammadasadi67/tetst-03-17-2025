@@ -9,6 +9,14 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
 
+# Dictionary to hold categories
+categories = {
+    "1000": [],
+    "125": [],
+    "200": [],
+    "gasti": []
+}
+
 # Home Page
 if page == "Home":
     st.title("Welcome to My Streamlit App")
@@ -32,6 +40,20 @@ elif page == "upload":
                 st.error("File is too large! Please upload a smaller file.")
                 continue
 
+            # Check the category based on the file name
+            category = None
+            for cat in categories.keys():
+                if file_name.endswith(cat):
+                    category = cat
+                    break
+
+            if category is None:
+                st.error(f"File '{file_name}' does not belong to any known category.")
+                continue
+
+            # Add the file to its category list
+            categories[category].append(uploaded_file)
+
             # Read the file with a loading indicator
             with st.spinner("Processing..."):
                 try:
@@ -53,12 +75,20 @@ elif page == "upload":
             selected_data = df.iloc[9:11, 8:16]  # I=8, P=15 in zero-index
 
             # Display extracted data
+            st.write(f"Category: {category}")
             st.write(selected_data)
 
 # Archive Page
 elif page == "archive":
     st.title("Archive")
-    st.write("Your categories")
+    st.write("Your categories:")
+    for category, files in categories.items():
+        st.write(f"Category: {category}")
+        if files:
+            for file in files:
+                st.write(f"File: {file.name}")
+        else:
+            st.write("No files uploaded for this category.")
 
 # Contact Me Page
 elif page == "contact me":
