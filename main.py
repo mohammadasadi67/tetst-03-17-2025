@@ -2,77 +2,99 @@ import streamlit as st
 import pandas as pd
 import os
 from io import BytesIO
-import re
 
-# Set up base directory to store files
-BASE_DIR = "uploaded_files"
-os.makedirs(BASE_DIR, exist_ok=True)
+# Set page title
+st.set_page_config(page_title="My Streamlit App", layout="wide")
 
-# Define categories based on filename pattern
-CATEGORIES = ["1000", "1000cc", "200", "200cc", "125", "gasti"]
-
-# Function to extract category from filename
-def extract_category(filename):
-    match = re.search(r"(\d{8})(1000|1000cc|200|200cc|125|gasti)", filename, re.IGNORECASE)
-    if match:
-        return match.group(2).lower()  # Ensure lowercase for consistency
-    return None
-
-# Function to extract date from filename
-def extract_date_from_filename(filename):
-    match = re.search(r"(\d{8})", filename)
-    return match.group(1) if match else "unknown_date"
-
-# Function to save file in the correct folder
-def save_file_to_category_folder(uploaded_file, category):
-    file_date = extract_date_from_filename(uploaded_file.name)
-    folder_path = os.path.join(BASE_DIR, f"{category}_files")
-
-    # Create category folder if it doesn't exist
-    os.makedirs(folder_path, exist_ok=True)
-
-    # Define the full file path with date for tracking
-    new_file_name = f"{file_date}_{uploaded_file.name}"
-    file_path = os.path.join(folder_path, new_file_name)
-
-    # Save the file
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-
-    st.success(f"File saved in: `{file_path}`")  # Display the saved path
-    return file_path
-
-# Streamlit UI
-st.set_page_config(page_title="File Organizer", layout="wide")
+# Sidebar navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Upload", "Archive"])
+page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
 
-if page == "Upload":
-    st.title("Upload Files and Organize Automatically")
-    
+# Define category folders
+CATEGORY_FOLDERS = {
+    "1000": "1000",
+    "1000cc": "1000",
+    "125": "125",
+    "200": "200",
+    "200cc": "200",
+    "gasti": "gasti",
+    "Gasti": "gasti"
+}
+
+# Ensure folders exist
+for folder in set(CATEGORY_FOLDERS.values()):
+    os.makedirs(folder, exist_ok=True)
+
+# Home Page
+if page == "Home":
+    st.title("Welcome to My Streamlit App")
+    st.write("This is the home page.")
+
+# Upload Page
+elif page == "upload":
+    st.title("Upload Source")
+    st.write("Here you can upload your daily file")
+
+    # File uploader
     uploaded_files = st.file_uploader("Upload your Excel files", type=["xlsx"], accept_multiple_files=True)
-    
+
     if uploaded_files:
         for uploaded_file in uploaded_files:
             file_name = uploaded_file.name
-            category = extract_category(file_name)
+            st.subheader(f"Processing: {file_name}...")
 
-            if category:
-                st.subheader(f"Processing: {file_name} (Category: {category})")
-                save_file_to_category_folder(uploaded_file, category)
-            else:
-                st.error(f"File '{file_name}' does not belong to any known category.")
+            # Check file size
+            if uploaded_file.size > 5_000_000:
+                st.error("File is too large! Please upload a smaller file.")
+                continue
 
-elif page == "Archive":
-    st.title("File Archive")
-    st.write("Your files are stored in the following folders:")
-    
-    for category in CATEGORIES:
-        folder_path = os.path.join(BASE_DIR, f"{category}_files")
-        if os.path.exists(folder_path):
-            files = os.listdir(folder_path)
-            st.subheader(f"{category.upper()} Files:")
-            for file in files:
-                st.write(f"📂 {file}")
-        else:
-            st.warning(f"No files in {category} category yet.")
+            # Determine category based on filename
+            category = None
+            for key in CATEGORY_FOLDERS:
+                if key in file_name:
+                    category = CATEGORY_FOLDERS[key]
+                    break
+
+            if category is None:
+                st.warning(f"Category not found for file: {file_name}. Skipping...")
+                continue
+
+            # Save file in the corresponding category folder
+            save_path = os.path.join(category, file_name)
+            with open(save_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+
+            st.success(f"File saved to {category}/")
+
+            # Read and process the file
+            with st.spinner("Processing..."):
+                try:
+                    df = pd.read_excel(uploaded_file, sheet_name=0, header=None, engine="openpyxl")
+                    st.success("File processed successfully!")
+                except Exception as e:
+                    st.error(f"Error reading file: {e}")
+                    continue
+
+            # Show file shape (debugging)
+            st.write(f"File shape: {df.shape}")
+
+            # Ensure the file has enough data
+            if df.shape[0] < 11 or df.shape[1] < 16:
+                st.warning("File does not contain enough data for selection (I10:P11).")
+                continue
+
+            # Extract range I10:P11
+            selected_data = df.iloc[9:11, 8:16]  # I=8, P=15 in zero-index
+
+            # Display extracted data
+            st.write(selected_data)
+
+# Archive Page
+elif page == "archive":
+    st.title("Archive")
+    st.write("Your categories")
+
+# Contact Me Page
+elif page == "contact me":
+    st.title("All you need to contact me:")
+    st.write("m.asdz@yahoo.com")
