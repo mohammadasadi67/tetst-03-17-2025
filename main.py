@@ -42,17 +42,5 @@ elif page == "upload":
             st.subheader(f"Processing: {file_name} ({file_type})")
             
             # Read the Excel file into a Pandas DataFrame
-            df = pd.read_excel(uploaded_file)
-
-            # Display DataFrame
-            st.write(df.head())  # Show first few rows
-
-# Archive Page
-elif page == "archive":
-    st.title("Archive")
-    st.write("Your categories")
-
-# Contact Me Page
-elif page == "contact me":
-    st.title("All you need to contact me:")
-    st.write("m.asdz@yahoo.com")
+            df = pd.read_excel(uploaded_file, sheet_name=0, header=None)  # Read without headers
+            
