@@ -1,20 +1,24 @@
-import os
+import streamlit as st
+from pathlib import Path
 
-# Define archive folder paths
-archive_folders = [
-    "Archive_125",
-    "Archive_1000",
-    "Archive_200",
-    "Archive_gasti"
-]
+# Set page title
+st.set_page_config(page_title="My Streamlit App", layout="wide")
 
-# Delete all files inside each archive folder
-for folder in archive_folders:
-    if os.path.exists(folder):
-        for file in os.listdir(folder):
-            file_path = os.path.join(folder, file)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                print(f"Deleted: {file_path}")
-    else:
-        print(f"{folder} folder does not exist.")
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Page 1", "Page 2"])
+
+# Home Page
+if page == "Home":
+    st.title("Welcome to My Streamlit App")
+    st.write("This is the home page.")
+
+# Page 1
+elif page == "Page 1":
+    st.title("Page 1")
+    st.write("This is the content of Page 1.")
+
+# Page 2
+elif page == "Page 2":
+    st.title("Page 2")
+    st.write("This is the content of Page 2.")
