@@ -11,6 +11,13 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
 
+# Define base directory for saving files
+BASE_DIR = "uploaded_files"
+
+# Ensure base directory exists
+if not os.path.exists(BASE_DIR):
+    os.makedirs(BASE_DIR)
+
 # Dictionary to hold categories
 categories = {
     "1000": [],
@@ -21,27 +28,24 @@ categories = {
 
 # Function to extract date from the file name
 def extract_date_from_filename(filename):
-    return filename[:8]  # The date is assumed to be the first 8 characters
+    return filename[:8]  # Assumes the first 8 characters represent the date
 
-# Function to save the file into the category folder with the date appended to the file name
+# Function to save the file into the correct folder
 def save_file_to_category_folder(uploaded_file, category):
-    # Get the date from the file name
+    # Extract the date
     file_date = extract_date_from_filename(uploaded_file.name)
-    
-    # Define the folder path based on the category
-    folder_path = f"./{category}_files"
-    
-    # Create the folder if it doesn't exist
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
 
-    # Create the new file name with date included
+    # Define the category folder path
+    folder_path = os.path.join(BASE_DIR, f"{category}_files")
+
+    # Create the folder if it does not exist
+    os.makedirs(folder_path, exist_ok=True)
+
+    # New file name with date
     new_file_name = f"{file_date}_{uploaded_file.name}"
-    
-    # Save the file to the appropriate folder
     file_path = os.path.join(folder_path, new_file_name)
 
-    # Write the file to the specified path
+    # Save the file properly
     with open(file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
@@ -70,18 +74,13 @@ elif page == "upload":
                 st.error("File is too large! Please upload a smaller file.")
                 continue
 
-            # Check the category based on the file name (case-insensitive check)
+            # Determine category (case-insensitive)
             category = None
-            file_name_lower = file_name.lower().replace(".xlsx", "")  # To handle case insensitivity and remove .xlsx
+            file_name_lower = file_name.lower().replace(".xlsx", "")  # Remove .xlsx and make lowercase
 
-            # Check if file name ends with a category code (without .xlsx)
-            if file_name_lower.endswith("1000cc"):
+            if file_name_lower.endswith("1000cc") or file_name_lower.endswith("1000"):
                 category = "1000"
-            elif file_name_lower.endswith("1000"):
-                category = "1000"
-            elif file_name_lower.endswith("200cc"):
-                category = "200"
-            elif file_name_lower.endswith("200"):
+            elif file_name_lower.endswith("200cc") or file_name_lower.endswith("200"):
                 category = "200"
             elif file_name_lower.endswith("125"):
                 category = "125"
@@ -92,10 +91,7 @@ elif page == "upload":
                 st.error(f"File '{file_name}' does not belong to any known category.")
                 continue
 
-            # Add the file to its category list
-            categories[category].append(uploaded_file)
-
-            # Save the file to its respective folder with the date in the file name
+            # Save the file to the appropriate folder
             file_path = save_file_to_category_folder(uploaded_file, category)
 
             # Read the file with a loading indicator
@@ -107,20 +103,9 @@ elif page == "upload":
                     st.error(f"Error reading file: {e}")
                     continue
 
-            # Show file shape (debugging)
-            st.write(f"File shape: {df.shape}")
-
-            # Ensure the file has enough data
-            if df.shape[0] < 11 or df.shape[1] < 16:
-                st.warning("File does not contain enough data for selection (I10:P11).")
-                continue
-
-            # Extract range I10:P11
-            selected_data = df.iloc[9:11, 8:16]  # I=8, P=15 in zero-index
-
-            # Display extracted data
+            # Display category and file path
             st.write(f"Category: {category}")
-            st.write(selected_data)
+            st.write(f"Saved file path: {file_path}")
 
 # Archive Page
 elif page == "archive":
