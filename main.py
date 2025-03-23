@@ -44,13 +44,14 @@ elif page == "upload":
             category = None
             file_name_lower = file_name.lower()  # To handle case insensitivity
 
-            if file_name_lower.endswith("1000"):
+            # Check if file name ends with a category
+            if file_name_lower.endswith("1000.xlsx"):
                 category = "1000"
-            elif file_name_lower.endswith("125"):
+            elif file_name_lower.endswith("125.xlsx"):
                 category = "125"
-            elif file_name_lower.endswith("200"):
+            elif file_name_lower.endswith("200.xlsx"):
                 category = "200"
-            elif file_name_lower.endswith("gasti"):
+            elif file_name_lower.endswith("gasti.xlsx"):
                 category = "gasti"
 
             if category is None:
