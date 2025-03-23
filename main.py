@@ -6,10 +6,6 @@ from io import BytesIO
 # Set page title
 st.set_page_config(page_title="My Streamlit App", layout="wide")
 
-# Sidebar navigation
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
-
 # Define category folders
 CATEGORY_FOLDERS = {
     "1000": "1000",
@@ -21,9 +17,13 @@ CATEGORY_FOLDERS = {
     "Gasti": "gasti"
 }
 
-# Ensure folders exist
+# Ensure folders exist before any file is uploaded
 for folder in set(CATEGORY_FOLDERS.values()):
     os.makedirs(folder, exist_ok=True)
+
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
 
 # Home Page
 if page == "Home":
