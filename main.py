@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
 from io import BytesIO
+from datetime import datetime
 
 # Set page title
 st.set_page_config(page_title="My Streamlit App", layout="wide")
@@ -16,6 +18,34 @@ categories = {
     "200": [],
     "gasti": []
 }
+
+# Function to extract date from the file name
+def extract_date_from_filename(filename):
+    return filename[:8]  # The date is assumed to be the first 8 characters
+
+# Function to save the file into the category folder with the date appended to the file name
+def save_file_to_category_folder(uploaded_file, category):
+    # Get the date from the file name
+    file_date = extract_date_from_filename(uploaded_file.name)
+    
+    # Define the folder path based on the category
+    folder_path = f"./{category}_files"
+    
+    # Create the folder if it doesn't exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    # Create the new file name with date included
+    new_file_name = f"{file_date}_{uploaded_file.name}"
+    
+    # Save the file to the appropriate folder
+    file_path = os.path.join(folder_path, new_file_name)
+
+    # Write the file to the specified path
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+
+    return file_path
 
 # Home Page
 if page == "Home":
@@ -65,11 +95,14 @@ elif page == "upload":
             # Add the file to its category list
             categories[category].append(uploaded_file)
 
+            # Save the file to its respective folder with the date in the file name
+            file_path = save_file_to_category_folder(uploaded_file, category)
+
             # Read the file with a loading indicator
             with st.spinner("Processing..."):
                 try:
                     df = pd.read_excel(uploaded_file, sheet_name=0, header=None, engine="openpyxl")
-                    st.success("File processed successfully!")
+                    st.success(f"File saved successfully to {file_path}!")
                 except Exception as e:
                     st.error(f"Error reading file: {e}")
                     continue
