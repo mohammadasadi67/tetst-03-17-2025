@@ -42,16 +42,20 @@ elif page == "upload":
 
             # Check the category based on the file name (case-insensitive check)
             category = None
-            file_name_lower = file_name.lower()  # To handle case insensitivity
+            file_name_lower = file_name.lower().replace(".xlsx", "")  # To handle case insensitivity and remove .xlsx
 
-            # Check if file name ends with a category
-            if file_name_lower.endswith("1000.xlsx"):
+            # Check if file name ends with a category code (without .xlsx)
+            if file_name_lower.endswith("1000cc"):
                 category = "1000"
-            elif file_name_lower.endswith("125.xlsx"):
-                category = "125"
-            elif file_name_lower.endswith("200.xlsx"):
+            elif file_name_lower.endswith("1000"):
+                category = "1000"
+            elif file_name_lower.endswith("200cc"):
                 category = "200"
-            elif file_name_lower.endswith("gasti.xlsx"):
+            elif file_name_lower.endswith("200"):
+                category = "200"
+            elif file_name_lower.endswith("125"):
+                category = "125"
+            elif file_name_lower.endswith("gasti"):
                 category = "gasti"
 
             if category is None:
