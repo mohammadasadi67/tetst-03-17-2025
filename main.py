@@ -17,7 +17,7 @@ CATEGORY_FOLDERS = {
     "Gasti": "gasti"
 }
 
-# Ensure folders exist before any file is uploaded
+# Ensure main folders exist
 for folder in set(CATEGORY_FOLDERS.values()):
     os.makedirs(folder, exist_ok=True)
 
@@ -59,12 +59,16 @@ elif page == "upload":
                 st.warning(f"Category not found for file: {file_name}. Skipping...")
                 continue
 
-            # Save file in the corresponding category folder
-            save_path = os.path.join(category, file_name)
+            # Create subfolder for the category if not already present
+            category_folder_path = os.path.join(category, file_name.split('.')[0])  # Subfolder inside category
+            os.makedirs(category_folder_path, exist_ok=True)
+
+            # Save file in the corresponding category subfolder
+            save_path = os.path.join(category_folder_path, file_name)
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
-            st.success(f"File saved to {category}/")
+            st.success(f"File saved to {category_folder_path}/")
 
             # Read and process the file
             with st.spinner("Processing..."):
