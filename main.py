@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Change layout between "wide" and "centered" to see the difference
-st.set_page_config(page_title="Test App", layout="centered")
+st.set_page_config(page_title="Test App")
 
 st.title("Streamlit Layout Example")
 st.write("This content is centered because of `layout='centered'`.")
