@@ -19,7 +19,7 @@ elif page == "upload":
     st.write("here you can upload your daily file")
 
 # archive
-elif page == " archive":
+elif page == "archive":
     st.title("archive")
     st.write("your categories")
 
