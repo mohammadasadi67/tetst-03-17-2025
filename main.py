@@ -40,12 +40,18 @@ elif page == "upload":
                 st.error("File is too large! Please upload a smaller file.")
                 continue
 
-            # Check the category based on the file name
+            # Check the category based on the file name (case-insensitive check)
             category = None
-            for cat in categories.keys():
-                if file_name.endswith(cat):
-                    category = cat
-                    break
+            file_name_lower = file_name.lower()  # To handle case insensitivity
+
+            if file_name_lower.endswith("1000"):
+                category = "1000"
+            elif file_name_lower.endswith("125"):
+                category = "125"
+            elif file_name_lower.endswith("200"):
+                category = "200"
+            elif file_name_lower.endswith("gasti"):
+                category = "gasti"
 
             if category is None:
                 st.error(f"File '{file_name}' does not belong to any known category.")
