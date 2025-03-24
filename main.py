@@ -40,11 +40,6 @@ elif page == "Upload":
             file_name = uploaded_file.name
             st.subheader(f"Processing: {file_name}...")
 
-            # Check file size
-            if uploaded_file.size > 5_000_000:
-                st.error("File is too large! Please upload a smaller file.")
-                continue
-
             # Determine category based on filename
             category = None
             for key in CATEGORY_FOLDERS:
@@ -56,12 +51,17 @@ elif page == "Upload":
                 st.warning(f"Category not found for file: {file_name}. Skipping...")
                 continue
 
-            # Save file in the corresponding category folder
+            # Check if file already exists
             save_path = os.path.join(category, file_name)
+            if os.path.exists(save_path):
+                st.error(f"❌ File '{file_name}' already exists in {category}! Upload skipped.")
+                continue
+
+            # Save file in the corresponding category folder
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
-            st.success(f"File saved to {category}/")
+            st.success(f"✅ File saved to {category}/")
 
     # Download Section
     st.subheader("Download Files from Archive")
