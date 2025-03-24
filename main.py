@@ -9,21 +9,18 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 # Define category folders
 CATEGORY_FOLDERS = {
     "1000": "1000",
-    "1000cc": "1000",
     "125": "125",
     "200": "200",
-    "200cc": "200",
-    "gasti": "gasti",
-    "Gasti": "gasti"
+    "Gasti": "Gasti"
 }
 
 # Ensure main folders exist
-for folder in set(CATEGORY_FOLDERS.values()):
+for folder in CATEGORY_FOLDERS.values():
     os.makedirs(folder, exist_ok=True)
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
+page = st.sidebar.radio("Go to", ["Home", "Upload", "Archive", "Contact Me"])
 
 # Home Page
 if page == "Home":
@@ -31,7 +28,7 @@ if page == "Home":
     st.write("This is the home page.")
 
 # Upload Page
-elif page == "upload":
+elif page == "Upload":
     st.title("Upload Source")
     st.write("Here you can upload your daily file")
 
@@ -51,7 +48,7 @@ elif page == "upload":
             # Determine category based on filename
             category = None
             for key in CATEGORY_FOLDERS:
-                if key in file_name:
+                if key.lower() in file_name.lower():
                     category = CATEGORY_FOLDERS[key]
                     break
 
@@ -59,16 +56,12 @@ elif page == "upload":
                 st.warning(f"Category not found for file: {file_name}. Skipping...")
                 continue
 
-            # Create subfolder for the category if not already present
-            category_folder_path = os.path.join(category, file_name.split('.')[0])  # Subfolder inside category
-            os.makedirs(category_folder_path, exist_ok=True)
-
-            # Save file in the corresponding category subfolder
-            save_path = os.path.join(category_folder_path, file_name)
+            # Save file in the corresponding category folder
+            save_path = os.path.join(category, file_name)
             with open(save_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
-            st.success(f"File saved to {category_folder_path}/")
+            st.success(f"File saved to {category}/")
 
             # Read and process the file
             with st.spinner("Processing..."):
@@ -78,9 +71,6 @@ elif page == "upload":
                 except Exception as e:
                     st.error(f"Error reading file: {e}")
                     continue
-
-            # Show file shape (debugging)
-            st.write(f"File shape: {df.shape}")
 
             # Ensure the file has enough data
             if df.shape[0] < 11 or df.shape[1] < 16:
@@ -93,10 +83,34 @@ elif page == "upload":
             # Display extracted data
             st.write(selected_data)
 
+    # **Download Section**
+    st.subheader("Download Files from Archive")
+    selected_category = st.selectbox("Select a category:", list(CATEGORY_FOLDERS.values()))
+
+    if selected_category:
+        category_path = os.path.join(selected_category)
+        if os.path.exists(category_path):
+            files_in_category = os.listdir(category_path)
+            if files_in_category:
+                selected_file = st.selectbox("Select a file:", files_in_category)
+                if selected_file:
+                    file_path = os.path.join(category_path, selected_file)
+                    with open(file_path, "rb") as f:
+                        st.download_button(
+                            label=f"Download {selected_file}",
+                            data=f,
+                            file_name=selected_file,
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        )
+            else:
+                st.warning("No files available in this category.")
+        else:
+            st.warning("Category folder does not exist.")
+
 # Archive Page
-elif page == "archive":
+elif page == "Archive":
     st.title("Archive")
-    st.write("Your categories")
+    st.write("Your categorized files:")
 
     # Display files for each category
     for category, folder in CATEGORY_FOLDERS.items():
@@ -108,38 +122,13 @@ elif page == "archive":
             files_in_category = os.listdir(category_path)
             if files_in_category:
                 for file_name in files_in_category:
-                    file_path = os.path.join(category_path, file_name)
-                    
-                    # Check if the path is a file before trying to open it
-                    if os.path.isfile(file_path):
-                        st.write(f"**{file_name}**")
-
-                        # Provide download link
-                        with open(file_path, "rb") as f:
-                            st.download_button(
-                                label=f"Download {file_name}",
-                                data=f,
-                                file_name=file_name,
-                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            )
-
-                    else:
-                        st.warning(f"Skipping {file_name} because it is not a file.")
-                    
-                    # Option to upload a new file to this category
-                    upload = st.file_uploader(f"Upload a new file to {category}", type=["xlsx"], key=category+file_name)
-                    if upload:
-                        st.write(f"New file uploaded: {upload.name}")
-                        save_path = os.path.join(category_path, upload.name)
-                        with open(save_path, "wb") as f:
-                            f.write(upload.getbuffer())
-                        st.success(f"File uploaded to {category_path}/")
+                    st.write(f"📄 {file_name}")
             else:
                 st.write("No files available in this category.")
         else:
             st.warning(f"No folder found for category: {category}.")
 
 # Contact Me Page
-elif page == "contact me":
+elif page == "Contact Me":
     st.title("All you need to contact me:")
-    st.write("m.asdz@yahoo.com")
+    st.write("📧 m.asdz@yahoo.com")
