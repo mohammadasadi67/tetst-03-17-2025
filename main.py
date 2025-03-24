@@ -116,13 +116,40 @@ elif page == "archive":
     st.title("Archive")
     st.write("Your categories")
 
-    # خواندن اطلاعات فایل‌ها از پایگاه داده
-    c.execute('''SELECT * FROM files''')
-    files = c.fetchall()
+    # Display files for each category
+    for category, folder in CATEGORY_FOLDERS.items():
+        st.subheader(f"{category} Files")
 
-    # نمایش فایل‌ها
-    for file in files:
-        st.write(f"File Name: {file[1]}, Category: {file[2]}, Saved at: {file[3]}, Uploaded on: {file[4]}")
+        # List files in the folder
+        category_path = os.path.join(folder)
+        if os.path.exists(category_path):
+            files_in_category = os.listdir(category_path)
+            if files_in_category:
+                for file_name in files_in_category:
+                    file_path = os.path.join(category_path, file_name)
+                    st.write(f"**{file_name}**")
+
+                    # Provide download link
+                    with open(file_path, "rb") as f:
+                        st.download_button(
+                            label=f"Download {file_name}",
+                            data=f,
+                            file_name=file_name,
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        )
+
+                    # Option to upload a new file to this category
+                    upload = st.file_uploader(f"Upload a new file to {category}", type=["xlsx"], key=category+file_name)
+                    if upload:
+                        st.write(f"New file uploaded: {upload.name}")
+                        save_path = os.path.join(category_path, upload.name)
+                        with open(save_path, "wb") as f:
+                            f.write(upload.getbuffer())
+                        st.success(f"File uploaded to {category_path}/")
+            else:
+                st.write("No files available in this category.")
+        else:
+            st.warning(f"No folder found for category: {category}.")
 
 # Contact Me Page
 elif page == "contact me":
