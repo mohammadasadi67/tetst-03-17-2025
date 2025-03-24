@@ -11,7 +11,7 @@ CATEGORY_FOLDERS = {
     "1000": "1000",
     "125": "125",
     "200": "200",
-    "Gasti": "Gasti"
+    "gasti": "Gasti"  # اصلاح نام دسته‌بندی (کلید کوچک، مقدار اصلی بزرگ)
 }
 
 # Ensure main folders exist
@@ -37,24 +37,24 @@ elif page == "Upload":
 
     if uploaded_files:
         for uploaded_file in uploaded_files:
-            file_name = uploaded_file.name
-            st.subheader(f"Processing: {file_name}...")
+            file_name = uploaded_file.name.lower()  # تبدیل نام فایل به حروف کوچک
+            st.subheader(f"Processing: {uploaded_file.name}...")
 
-            # Determine category based on filename
+            # Determine category based on filename (case-insensitive)
             category = None
             for key in CATEGORY_FOLDERS:
-                if key in file_name:
+                if key in file_name:  # بررسی بدون حساسیت به حروف بزرگ/کوچک
                     category = CATEGORY_FOLDERS[key]
                     break
 
             if category is None:
-                st.warning(f"Category not found for file: {file_name}. Skipping...")
+                st.warning(f"❌ Category not found for file: {uploaded_file.name}. Skipping...")
                 continue
 
             # Check if file already exists
-            save_path = os.path.join(category, file_name)
+            save_path = os.path.join(category, uploaded_file.name)
             if os.path.exists(save_path):
-                st.error(f"❌ File '{file_name}' already exists in {category}! Upload skipped.")
+                st.error(f"❌ File '{uploaded_file.name}' already exists in {category}! Upload skipped.")
                 continue
 
             # Save file in the corresponding category folder
@@ -108,4 +108,3 @@ elif page == "Archive":
 elif page == "Contact Me":
     st.title("Contact Information")
     st.write("📧 Email: m.asdz@yahoo.com")
-
