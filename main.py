@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-import sqlite3
 from io import BytesIO
 
 # Set page title
@@ -9,36 +8,22 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 
 # Define category folders
 CATEGORY_FOLDERS = {
-    "125": "125",
-    "200cc": "200",
+    "1000": "1000",
     "1000cc": "1000",
-    "GASTI": "gasti"
+    "125": "125",
+    "200": "200",
+    "200cc": "200",
+    "gasti": "gasti",
+    "Gasti": "gasti"
 }
 
 # Ensure main folders exist
 for folder in set(CATEGORY_FOLDERS.values()):
     os.makedirs(folder, exist_ok=True)
 
-# Create or connect to SQLite database
-conn = sqlite3.connect('files.db')
-c = conn.cursor()
-
-# Create table if it doesn't exist
-c.execute('''CREATE TABLE IF NOT EXISTS files
-             (id INTEGER PRIMARY KEY, name TEXT, category TEXT, path TEXT, uploaded_on TEXT)''')
-conn.commit()
-
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
-
-# Function to save file info to the database
-def save_file_info(file_name, category, save_path):
-    from datetime import datetime
-    uploaded_on = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    c.execute('''INSERT INTO files (name, category, path, uploaded_on)
-                 VALUES (?, ?, ?, ?)''', (file_name, category, save_path, uploaded_on))
-    conn.commit()
 
 # Home Page
 if page == "Home":
@@ -85,9 +70,6 @@ elif page == "upload":
 
             st.success(f"File saved to {category_folder_path}/")
 
-            # Save file info to the database
-            save_file_info(file_name, category, save_path)
-
             # Read and process the file
             with st.spinner("Processing..."):
                 try:
@@ -127,17 +109,23 @@ elif page == "archive":
             if files_in_category:
                 for file_name in files_in_category:
                     file_path = os.path.join(category_path, file_name)
-                    st.write(f"**{file_name}**")
+                    
+                    # Check if the path is a file before trying to open it
+                    if os.path.isfile(file_path):
+                        st.write(f"**{file_name}**")
 
-                    # Provide download link
-                    with open(file_path, "rb") as f:
-                        st.download_button(
-                            label=f"Download {file_name}",
-                            data=f,
-                            file_name=file_name,
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        )
+                        # Provide download link
+                        with open(file_path, "rb") as f:
+                            st.download_button(
+                                label=f"Download {file_name}",
+                                data=f,
+                                file_name=file_name,
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            )
 
+                    else:
+                        st.warning(f"Skipping {file_name} because it is not a file.")
+                    
                     # Option to upload a new file to this category
                     upload = st.file_uploader(f"Upload a new file to {category}", type=["xlsx"], key=category+file_name)
                     if upload:
