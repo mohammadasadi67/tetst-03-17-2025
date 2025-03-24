@@ -3,8 +3,23 @@ import pandas as pd
 import os
 from io import BytesIO
 
+# Authentication
+def check_password():
+    """Check user password before accessing the app."""
+    st.sidebar.title("Login")
+    password = st.sidebar.text_input("Enter Password:", type="password")
+    
+    if password == "beautifulmind":
+        return True
+    else:
+        st.sidebar.warning("Incorrect password. Please try again.")
+        return False
+
+if not check_password():
+    st.stop()
+
 # Set page title and layout
-st.set_page_config(page_title="Data Management App", layout="wide")
+st.set_page_config(page_title="Data Management App - Runaway", layout="wide")
 
 # Define category folders
 CATEGORY_FOLDERS = {
