@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import sqlite3
 from io import BytesIO
 
 # Set page title
@@ -8,22 +9,36 @@ st.set_page_config(page_title="My Streamlit App", layout="wide")
 
 # Define category folders
 CATEGORY_FOLDERS = {
-    "1000": "1000",
-    "1000cc": "1000",
     "125": "125",
-    "200": "200",
     "200cc": "200",
-    "gasti": "gasti",
-    "Gasti": "gasti"
+    "1000cc": "1000",
+    "GASTI": "gasti"
 }
 
 # Ensure main folders exist
 for folder in set(CATEGORY_FOLDERS.values()):
     os.makedirs(folder, exist_ok=True)
 
+# Create or connect to SQLite database
+conn = sqlite3.connect('files.db')
+c = conn.cursor()
+
+# Create table if it doesn't exist
+c.execute('''CREATE TABLE IF NOT EXISTS files
+             (id INTEGER PRIMARY KEY, name TEXT, category TEXT, path TEXT, uploaded_on TEXT)''')
+conn.commit()
+
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "upload", "archive", "contact me"])
+
+# Function to save file info to the database
+def save_file_info(file_name, category, save_path):
+    from datetime import datetime
+    uploaded_on = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute('''INSERT INTO files (name, category, path, uploaded_on)
+                 VALUES (?, ?, ?, ?)''', (file_name, category, save_path, uploaded_on))
+    conn.commit()
 
 # Home Page
 if page == "Home":
@@ -70,6 +85,9 @@ elif page == "upload":
 
             st.success(f"File saved to {category_folder_path}/")
 
+            # Save file info to the database
+            save_file_info(file_name, category, save_path)
+
             # Read and process the file
             with st.spinner("Processing..."):
                 try:
@@ -97,6 +115,14 @@ elif page == "upload":
 elif page == "archive":
     st.title("Archive")
     st.write("Your categories")
+
+    # خواندن اطلاعات فایل‌ها از پایگاه داده
+    c.execute('''SELECT * FROM files''')
+    files = c.fetchall()
+
+    # نمایش فایل‌ها
+    for file in files:
+        st.write(f"File Name: {file[1]}, Category: {file[2]}, Saved at: {file[3]}, Uploaded on: {file[4]}")
 
 # Contact Me Page
 elif page == "contact me":
