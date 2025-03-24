@@ -3,6 +3,9 @@ import pandas as pd
 import os
 from io import BytesIO
 
+# این خط باید اولین دستور باشد
+st.set_page_config(page_title="Data Management App - Runaway", layout="wide")
+
 # Authentication
 def check_password():
     """Check user password before accessing the app."""
@@ -17,9 +20,6 @@ def check_password():
 
 if not check_password():
     st.stop()
-
-# Set page title and layout
-st.set_page_config(page_title="Data Management App - Runaway", layout="wide")
 
 # Define category folders
 CATEGORY_FOLDERS = {
